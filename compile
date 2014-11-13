@@ -1,6 +1,6 @@
 #!/bin/bash
 
-g++ -std=c++11 src/main.cpp src/xmlexporter.cpp src/xmlinheritancemanager.cpp src/xmlgeomutils.cpp src/xmltexturehelper.cpp src/xmlfile.cpp src/tinyxml2.cpp -o build/skp2obj -Iinclude/ -framework slapi
+g++ -std=c++11 src/main.cpp src/xmlexporter.cpp src/xmlinheritancemanager.cpp src/xmlgeomutils.cpp src/xmltexturehelper.cpp src/xmlfile.cpp src/tinyxml2.cpp -o build/skp2xml -Iinclude/ -framework slapi
 
 
 

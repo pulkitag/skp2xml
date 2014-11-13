@@ -536,6 +536,140 @@ void CXmlExporter::WriteFace(SUFaceRef face) {
   SU_CALL(SUFaceGetNumInnerLoops(face, &num_loops));
   num_loops++;  // add the outer loop
 
+  if (num_loops == 1){
+    // Simple Face
+    info.has_single_loop_ = true;
+	}
+	else {
+		info.has_single_loop_ = false;
+	}
+
+	// Create a mesh from face.
+	SUMeshHelperRef mesh_ref = SU_INVALID;
+	SU_CALL(SUMeshHelperCreateWithTextureWriter(&mesh_ref, face,
+																							texture_writer_));
+
+	// Get the vertices
+	size_t num_vertices = 0;
+	SU_CALL(SUMeshHelperGetNumVertices(mesh_ref, &num_vertices));
+	if (num_vertices == 0)
+		return;
+
+	std::vector<SUPoint3D> vertices(num_vertices);
+	SU_CALL(SUMeshHelperGetVertices(mesh_ref, num_vertices,
+																	&vertices[0], &num_vertices));
+
+	//Get the normals
+	std::vector<SUVector3D> normals(num_vertices);
+	SU_CALL(SUMeshHelperGetNormals(mesh_ref, num_vertices,
+																	&normals[0], &num_vertices));
+	// Get triangle indices.
+	size_t num_triangles = 0;
+	SU_CALL(SUMeshHelperGetNumTriangles(mesh_ref, &num_triangles));
+
+	const size_t num_indices = 3 * num_triangles;
+	size_t num_retrieved = 0;
+	std::vector<size_t> indices(num_indices);
+	SU_CALL(SUMeshHelperGetVertexIndices(mesh_ref, num_indices,
+																			 &indices[0], &num_retrieved));
+
+	// Get UV coords.
+	std::vector<SUPoint3D> front_stq(num_vertices);
+	std::vector<SUPoint3D> back_stq(num_vertices);
+	size_t count;
+	if (info.has_front_texture_) {
+		SU_CALL(SUMeshHelperGetFrontSTQCoords(mesh_ref, num_vertices,
+																					&front_stq[0], &count));
+	}
+
+	if (info.has_back_texture_) {
+		SU_CALL(SUMeshHelperGetBackSTQCoords(mesh_ref, num_vertices,
+																				 &back_stq[0], &count));
+	}
+
+	for (size_t i_triangle = 0; i_triangle < num_triangles; i_triangle++) {
+
+		// Three points in each triangle
+		for (size_t i = 0; i < 3; i++) {
+			XmlFaceVertex vertex_info;
+			// Get vertex
+			size_t index = indices[i_triangle * 3 + i];
+			vertex_info.vertex_.SetLocation(vertices[index].x,
+																			vertices[index].y,
+																			vertices[index].z);
+
+			vertex_info.normal_.SetDirection(normals[index].x,
+																			 normals[index].y,
+																			 normals[index].z);
+			if (info.has_front_texture_) {
+				SUPoint3D stq = front_stq[index];
+				vertex_info.front_texture_coord_ = CPoint3d(stq.x, stq.y, 0);
+			}
+
+			if (info.has_back_texture_) {
+				SUPoint3D stq = back_stq[index];
+				vertex_info.back_texture_coord_ = CPoint3d(stq.x, stq.y, 0);
+			}
+			info.vertices_.push_back(vertex_info);
+		}
+	}
+
+	stats_.AddFace();
+	file_.WriteFaceInfo(info);
+	SU_CALL(SUUVHelperRelease(&uv_helper));
+}
+
+
+/*
+void CXmlExporter::WriteFace(SUFaceRef face) {
+  if (SUIsInvalid(face))
+    return;
+
+  XmlFaceInfo info;
+
+  // Get Current layer off of our stack and then get the id from it
+  SULayerRef layer = inheritance_manager_.GetCurrentLayer();
+  if (!SUIsInvalid(layer)) {
+    info.layer_name_ = GetLayerName(layer);
+  }
+
+  // Get the current front and back materials off of our stack
+  if (options_.export_materials()) {
+    SUMaterialRef front_material =
+        inheritance_manager_.GetCurrentFrontMaterial();
+    if (!SUIsInvalid(front_material)) {
+      // Material name
+      info.front_mat_name_ = GetMaterialName(front_material);
+
+      // Has texture ?
+      SUTextureRef texture_ref = SU_INVALID;
+      info.has_front_texture_ =
+          SUMaterialGetTexture(front_material, &texture_ref) == SU_ERROR_NONE;
+    }
+    SUMaterialRef back_material =
+        inheritance_manager_.GetCurrentBackMaterial();
+    if (!SUIsInvalid(back_material)) {
+      // Material name
+      info.back_mat_name_ = GetMaterialName(back_material);
+
+      // Has texture ?
+      SUTextureRef texture_ref = SU_INVALID;
+      info.has_back_texture_ =
+          SUMaterialGetTexture(back_material, &texture_ref) == SU_ERROR_NONE;
+    }
+  }
+  bool has_texture = info.has_front_texture_ || info.has_back_texture_;
+
+  // Get a uv helper
+  SUUVHelperRef uv_helper = SU_INVALID;
+  SUFaceGetUVHelper(face, info.has_front_texture_, info.has_back_texture_,
+                    texture_writer_, &uv_helper);
+
+  // Find out how many loops the face has
+  size_t num_loops = 0;
+  SU_CALL(SUFaceGetNumInnerLoops(face, &num_loops));
+  num_loops++;  // add the outer loop
+
   if (num_loops == 1) {
     // Simple Face
     info.has_single_loop_ = true;
@@ -649,6 +783,7 @@ void CXmlExporter::WriteFace(SUFaceRef face) {
 
   SU_CALL(SUUVHelperRelease(&uv_helper));
 }
+*/
 
 XmlEdgeInfo CXmlExporter::GetEdgeInfo(SUEdgeRef edge) const {
   XmlEdgeInfo info;

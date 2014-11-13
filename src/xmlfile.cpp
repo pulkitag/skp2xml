@@ -38,6 +38,7 @@ static const std::string kBackMaterialTag("BackMaterial");
 static const std::string kHasTextureTag("HasTexture");
 static const std::string kTrianglesTag("Triangles");
 static const std::string kPointTag("Point");
+static const std::string kNormalTag("Normal");
 static const std::string kFrontTextureCoordsTag("FrontTextureCoords");
 static const std::string kBackTextureCoordsTag("BackTextureCoords");
 static const std::string kLoopTag("Loop");
@@ -45,6 +46,9 @@ static const std::string kVertexTag("Vertex");
 static const std::string kXTag("x");
 static const std::string kYTag("y");
 static const std::string kZTag("z");
+static const std::string kNxTag("nx");
+static const std::string kNyTag("ny");
+static const std::string kNzTag("nz");
 static const std::string kUTag("u");
 static const std::string kVTag("v");
 static const std::string kStartTag("Start");
@@ -567,14 +571,19 @@ void CXmlFile::WriteFaceInfo(const XmlFaceInfo& info) {
 
   // Loop or Triangles
   size_t count = info.vertices_.size();
-  if (info.has_single_loop_) {
+  /*
+	if (info.has_single_loop_) {
     WriteStartTag(kLoopTag.c_str());
   } else {
     tinyxml2::XMLElement* elem = WriteStartTag(kTrianglesTag.c_str());
     elem->SetAttribute(kCountTag.c_str(), static_cast<unsigned>(count / 3));
   }
+	*/
 
-  // Vertices
+	tinyxml2::XMLElement* elem = WriteStartTag(kTrianglesTag.c_str());
+	elem->SetAttribute(kCountTag.c_str(), static_cast<unsigned>(count / 3));
+  
+	// Vertices
   for (size_t i = 0; i < count; i++) {
     WriteStartTag(kVertexTag.c_str());
     const XmlFaceVertex& vertex_info = info.vertices_[i];
@@ -585,7 +594,14 @@ void CXmlFile::WriteFaceInfo(const XmlFaceInfo& info) {
       elem->SetAttribute(kZTag.c_str(), vertex_info.vertex_.z());
       PopParentNode();
     }
-
+		
+		{
+      tinyxml2::XMLElement* elem = WriteStartTag(kNormalTag.c_str());
+      elem->SetAttribute(kNxTag.c_str(), vertex_info.normal_.x());
+      elem->SetAttribute(kNyTag.c_str(), vertex_info.normal_.y());
+      elem->SetAttribute(kNzTag.c_str(), vertex_info.normal_.z());
+      PopParentNode();
+    }
     if (info.has_front_texture_) {
       tinyxml2::XMLElement* elem =
           WriteStartTag(kFrontTextureCoordsTag.c_str());

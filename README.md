@@ -7,7 +7,8 @@ Installation
 -------------
 
 Mac: ./compile
-Other Platforms: not availale
+
+Other Platforms: Not Available
 
 
 Run

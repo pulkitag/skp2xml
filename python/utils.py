@@ -20,8 +20,8 @@ class Material:
 		self.kd_ = Color('#ffffff')
 		self.ks_ = Color('#555555')
 		self.alpha_ = 1
-		self.is_opacity_ = false
-		self.is_image_ = false
+		self.is_opacity_ = False
+		self.is_image_ = False
 		self.image_name_ = ''
 		self.name_ = 'default'
 

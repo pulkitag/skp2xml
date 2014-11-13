@@ -65,6 +65,7 @@ struct XmlFaceVertex {
   XmlGeomUtils::CPoint3d vertex_;
   XmlGeomUtils::CPoint3d front_texture_coord_;
   XmlGeomUtils::CPoint3d back_texture_coord_;
+	XmlGeomUtils::CVector3d normal_;
 };
 
 struct XmlFaceInfo {

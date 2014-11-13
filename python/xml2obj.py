@@ -44,9 +44,11 @@ def parse_data(text, objFid, mtlFid):
 			parse_version(child,objFid)
 		elif child.tag == 'Layers':
 			#Do Nothing
+			print "Nothing"
 		elif child.tag == 'Materials':
 			parse_materials(child, mtlFid)
 		elif child.tag == 'Geometry':
+			print "Nothing"
 			#parse_geometry(child, objFid)
 
 def main(filename):
