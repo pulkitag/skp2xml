@@ -1,9 +1,10 @@
-class Color:
-	def __init__(self):
-		self.r_ = 0.0
-		self.g_ = 0.0
-		self.b_ = 0.0
+def tolComp(x, y, tol):
+    if abs(x-y) < tol:
+        return True
+    else:
+        return False
 
+class Color:
 	def __init__(self, hexString):
 		assert(len(hexString)==7)
 		hexString = hexString[1:]
@@ -13,6 +14,54 @@ class Color:
 
 	def toStr(self):
 		return '%.6f \t %.6f \t %.6f' % (self.r_, self.g_, self.b_)
+
+class Point3d:
+    def __init__(self,x=0.0,y=0.0,z=1.0):
+        self.x_ = x
+        self.y_ = y
+        self.z_ = z
+
+    def __eq__(self, other):
+        tol = 1e-3
+        return tolComp(self.x_, other.x_, tol) and \
+               tolComp(self.y_, other.y_, tol) and \
+               tolComp(self.z_, other.z_, tol)
+
+    def display(self):
+        print "%f \t %f \t %f" % (self.x_, self.y_, self.z_)
+
+    def get_display_str(self):
+        return "%f \t %f \t %f" % (self.x_, self.y_, self.z_)
+
+    def get_display_strxy(self):
+        return "%f \t %f" % (self.x_, self.y_)
+
+class Store:
+    def __init__(self, prefix = 'v'):
+        self.x_ = []
+        self.prefix_ = prefix
+
+    def append(self, x):
+        if x in self.x_:
+            return self.x_.index(x)
+        else:
+            self.x_.append(x)
+            return len(self.x_) - 1
+
+    def append_and_write(self, x, fid):
+        if x in self.x_:
+            return self.x_.index(x)
+        else:
+            self.x_.append(x)
+            if self.prefix_ == 'v' or self.prefix_ == 'vn':
+                fid.write('%s \t %s \n' % (self.prefix_, x.get_display_str()))
+            else:
+                fid.write('%s \t %s \n' % (self.prefix_, x.get_display_strxy()))
+            return len(self.x_) - 1
+
+
+    def length(self):
+        return len(self.x_)
 
 class Material:
 	def __init__(self):
@@ -38,7 +87,7 @@ class Material:
 		self.name_ = name
 
 	def setAlpha(self, alpha):
-		self.alpha_ = alpha
+		self.alpha_ = float(alpha)
 
 	def setOpacity(self, is_op):
 		self.is_opacity_ = is_op
